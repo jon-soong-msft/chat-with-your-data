@@ -28,9 +28,23 @@ Reference-architecture attribution: TRUE/FALSE classifier prompt shape
 used by RAI_AGENT.instructions.
 """
 
+from enum import StrEnum
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from backend.core.agents.presets import AssistantType, body_for
+
+
+class DefinitionTool(StrEnum):
+    """Server-side hosted tool keys an `AgentDefinition.tools` may declare.
+
+    Each member's value is the opaque key the agents provider maps to a
+    concrete Foundry SDK `Tool` via `_DEFINITION_TOOL_BUILDERS`. The
+    values are hosted-tool identifiers, not Foundry class names.
+    """
+
+    CODE_INTERPRETER = "code_interpreter"
+    WEB_SEARCH = "web_search"
 
 
 class AgentDefinition(BaseModel):
@@ -122,7 +136,7 @@ CWYD_AGENT = AgentDefinition(
         "synthesising grounded responses with citations."
     ),
     instructions=compose_cwyd_instructions(CWYD_DEFAULT_BODY),
-    tools=(),
+    tools=(DefinitionTool.CODE_INTERPRETER, DefinitionTool.WEB_SEARCH),
 )
 
 
@@ -167,7 +181,7 @@ RAI_AGENT = AgentDefinition(
 # reviewer is calibrated to allow legitimate assistant configuration and
 # block only a prompt that directs the assistant to behave harmfully.
 PROMPT_REVIEW_AGENT = AgentDefinition(
-    name="prompt_review",
+    name="prompt-review",
     description=(
         "Responsible AI reviewer for administrator-authored system "
         "prompts. Returns TRUE or FALSE only -- TRUE if the proposed "

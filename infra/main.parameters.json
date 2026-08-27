@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "deploymentFlavor": {
-      "value": "${DEPLOYMENT_FLAVOR=bicep}"
+      "value": "${DEPLOYMENT_FLAVOR=avm-waf}"
     },
     "solutionName": {
       "value": "${AZURE_ENV_NAME}"
@@ -67,6 +67,30 @@
     },
     "existingFoundryProjectResourceId": {
       "value": "${AZURE_EXISTING_AIPROJECT_RESOURCE_ID}"
+    },
+    "enableTelemetry": {
+      "value": "${ENABLE_TELEMETRY=true}"
+    },
+    "enableMonitoring": {
+      "value": "${ENABLE_MONITORING=false}"
+    },
+    "enableScalability": {
+      "value": "${ENABLE_SCALABILITY=true}"
+    },
+    "enableRedundancy": {
+      "value": "${ENABLE_REDUNDANCY=false}"
+    },
+    "enablePrivateNetworking": {
+      "value": "${ENABLE_PRIVATE_NETWORKING=true}"
+    },
+    "vmAdminUsername": {
+      "value": "${AZURE_ENV_VM_ADMIN_USERNAME}"
+    },
+    "vmAdminPassword": {
+      "value": "${AZURE_ENV_VM_ADMIN_PASSWORD}"
+    },
+    "vmSize": {
+      "value": "${AZURE_ENV_JUMPBOX_SIZE=Standard_D2s_v5}"
     }
   }
 }

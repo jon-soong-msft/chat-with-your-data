@@ -59,7 +59,7 @@ param location string
   azd: {
     type: 'location'
     usageName: [
-      'OpenAI.GlobalStandard.gpt-5.4-mini,50'
+      'OpenAI.GlobalStandard.gpt-5.6-sol,50'
       'OpenAI.GlobalStandard.gpt-5-mini,50'
       'OpenAI.Standard.text-embedding-3-small,100'
     ]

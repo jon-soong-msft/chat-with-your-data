@@ -10,6 +10,8 @@ Validates:
   looks up by name).
 """
 
+import re
+
 import pytest
 from pydantic import ValidationError
 
@@ -21,6 +23,7 @@ from backend.core.agents.definitions import (
     PROMPT_REVIEW_AGENT,
     RAI_AGENT,
     AgentDefinition,
+    DefinitionTool,
     compose_cwyd_instructions,
     resolve_cwyd_instructions,
 )
@@ -84,16 +87,17 @@ def test_agent_definition_tools_is_tuple_for_immutability() -> None:
 
 def test_cwyd_agent_carries_vetted_v1_default_prompt() -> None:
     """CWYD ships v1's vetted Azure-OpenAI-On-Your-Data answering
-    system prompt as its default instructions. Its retrieval tool is a
-    runtime MCP tool bound at `run()` time -- not a server-side tool
-    baked into the agent at `create_agent` -- so `tools` stays empty (a
-    stale `"search"` placeholder would be forwarded to `create_agent`
-    as a bogus tool key) and the grounding intent lives in the
-    instructions instead.
+    system prompt as its default instructions. It also declares the
+    hosted code-interpreter and web-search tools, which the agents
+    provider realizes as server-side `PromptAgentDefinition` tools; KB
+    retrieval remains a runtime MCP tool bound at `run()` time.
     """
     instr = CWYD_AGENT.instructions
     assert CWYD_AGENT.name == "cwyd"
-    assert CWYD_AGENT.tools == ()
+    assert CWYD_AGENT.tools == (
+        DefinitionTool.CODE_INTERPRETER,
+        DefinitionTool.WEB_SEARCH,
+    )
     # Grounds strictly in retrieved documents (the vetted intent).
     assert "retrieved documents" in instr.lower()
     # Carries the [doc+index] citation format the v2
@@ -197,6 +201,43 @@ def test_cwyd_guardrail_states_non_negotiable_rules() -> None:
     )
     # Refuse-to-modify-rules clause is present.
     assert "fixed" in CWYD_GUARDRAIL.lower()
+
+
+# ---------------------------------------------------------------------------
+# Foundry agent-name validity + hosted tool wiring
+# ---------------------------------------------------------------------------
+
+# Foundry `agents.create_version` rejects a name that is not
+# alphanumeric-bounded with only interior hyphens (<= 63 chars). An
+# underscore (`prompt_review`) is the exact shape that 503'd every
+# custom admin-prompt save (see v2/docs/bugs.md).
+_FOUNDRY_AGENT_NAME = re.compile(r"^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$")
+
+
+@pytest.mark.parametrize("definition", list(BUILTIN_AGENTS.values()))
+def test_builtin_agent_names_are_foundry_valid(definition: AgentDefinition) -> None:
+    """Every built-in agent name must satisfy Foundry's create_version
+    charset rule -- alphanumeric ends, interior hyphens only, no
+    underscores -- so `agents.create_version(agent_name=...)` never
+    fails with `(invalid_parameters) Must start and end with
+    alphanumeric characters...`.
+    """
+    assert _FOUNDRY_AGENT_NAME.match(definition.name), definition.name
+
+
+def test_prompt_review_agent_name_has_no_underscore() -> None:
+    """Regression guard for the 503 defect: the prompt-review
+    classifier name must use a hyphen, not an underscore, or Foundry
+    rejects the agent version and the admin PATCH fails closed."""
+    assert PROMPT_REVIEW_AGENT.name == "prompt-review"
+    assert "_" not in PROMPT_REVIEW_AGENT.name
+
+
+def test_definition_tool_values_are_hosted_tool_keys() -> None:
+    """The `DefinitionTool` StrEnum values are the opaque hosted-tool
+    keys the agents provider maps to Foundry SDK tools."""
+    assert DefinitionTool.CODE_INTERPRETER == "code_interpreter"
+    assert DefinitionTool.WEB_SEARCH == "web_search"
 
 
 def test_cwyd_guardrail_grounds_relevant_but_brief_documents() -> None:

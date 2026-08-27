@@ -48,7 +48,12 @@ from typing import Callable
 
 from agent_framework import Agent, ToolTypes
 from azure.ai.projects.aio import AIProjectClient
-from azure.ai.projects.models import PromptAgentDefinition, Tool
+from azure.ai.projects.models import (
+    CodeInterpreterTool,
+    PromptAgentDefinition,
+    Tool,
+    WebSearchTool,
+)
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.exceptions import (
     AzureError,
@@ -59,6 +64,7 @@ from azure.core.exceptions import (
 from backend.core.agents.definitions import (
     CWYD_AGENT,
     AgentDefinition,
+    DefinitionTool,
     resolve_cwyd_instructions,
 )
 from backend.core.providers.databases.base import BaseDatabaseClient
@@ -70,12 +76,15 @@ logger = logging.getLogger(__name__)
 
 # Builders that realize an `AgentDefinition.tools` opaque key as a
 # concrete Foundry SDK `Tool` for the server-side prompt-agent
-# definition. Empty by default: the built-in agents ground via an MCP
-# tool attached client-side at `build_agent` time, so neither declares
-# a definition-level tool. A swap-in agent that needs a server-side
-# tool registers its builder here, keyed by the string it places in
-# `AgentDefinition.tools`.
-_DEFINITION_TOOL_BUILDERS: dict[str, Callable[[], Tool]] = {}
+# definition. The built-in agents also ground via an MCP tool attached
+# client-side at `build_agent` time; these builders add the hosted
+# tools a definition declares. A swap-in agent that needs another
+# server-side tool registers its builder here, keyed by the string it
+# places in `AgentDefinition.tools`.
+_DEFINITION_TOOL_BUILDERS: dict[str, Callable[[], Tool]] = {
+    DefinitionTool.CODE_INTERPRETER: CodeInterpreterTool,
+    DefinitionTool.WEB_SEARCH: WebSearchTool,
+}
 
 
 def _definition_tools_to_sdk(keys: tuple[str, ...]) -> list[Tool] | None:

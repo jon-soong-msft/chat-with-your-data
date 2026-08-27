@@ -101,7 +101,7 @@ module virtualMachine 'br/public:avm/res/compute/virtual-machine:0.22.0' = {
     bypassPlatformSafetyChecksOnUserSchedule: true
     maintenanceConfigurationResourceId: maintenanceConfigurationResourceId
     enableAutomaticUpdates: true
-    encryptionAtHost: true
+    encryptionAtHost: false
     availabilityZone: availabilityZone
     proximityPlacementGroupResourceId: proximityPlacementGroupResourceId
     imageReference: imageReference

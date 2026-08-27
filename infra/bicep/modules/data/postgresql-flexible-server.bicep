@@ -35,7 +35,7 @@ param configurations array = []
 @description('Optional. Managed identity configuration for the resource.')
 param identity object = { type: 'SystemAssigned' }
 
-resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2026-01-01-preview' = {
+resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2025-08-01' = {
   name: name
   location: location
   tags: tags
@@ -62,7 +62,7 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2026-01-01-pr
   }
 }
 
-resource firewallAllowAzureIPs 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2026-01-01-preview' = {
+resource firewallAllowAzureIPs 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2025-08-01' = {
   name: 'AllowAllAzureServicesAndResourcesWithinAzureIps'
   parent: postgresServer
   properties: {
@@ -71,7 +71,7 @@ resource firewallAllowAzureIPs 'Microsoft.DBforPostgreSQL/flexibleServers/firewa
   }
 }
 
-resource firewallAllowAll 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2026-01-01-preview' = {
+resource firewallAllowAll 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2025-08-01' = {
   name: 'AllowAll'
   parent: postgresServer
   properties: {
@@ -82,7 +82,7 @@ resource firewallAllowAll 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRul
 
 // AAD admins must wait for firewall rules — server needs to be fully accessible first
 @batchSize(1)
-resource postgresAdmins 'Microsoft.DBforPostgreSQL/flexibleServers/administrators@2026-01-01-preview' = [
+resource postgresAdmins 'Microsoft.DBforPostgreSQL/flexibleServers/administrators@2025-08-01' = [
   for admin in administrators: {
     parent: postgresServer
     name: admin.objectId
@@ -98,7 +98,7 @@ resource postgresAdmins 'Microsoft.DBforPostgreSQL/flexibleServers/administrator
   }
 ]
 
-resource serverDatabases 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2026-01-01-preview' = [
+resource serverDatabases 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2025-08-01' = [
   for db in databases: {
     name: db.name
     parent: postgresServer
@@ -113,7 +113,7 @@ resource serverDatabases 'Microsoft.DBforPostgreSQL/flexibleServers/databases@20
 ]
 
 @batchSize(1)
-resource serverConfigurations 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2026-01-01-preview' = [
+resource serverConfigurations 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = [
   for config in configurations: {
     name: config.name
     parent: postgresServer
