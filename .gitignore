@@ -426,6 +426,7 @@ FodyWeavers.xsd
 # Python
 .env
 .venv
+.venv-*/
 
 temp/
 .azure
@@ -455,3 +456,8 @@ Pipfile.lock
 # Ignore sample code folder
 data/sample_code/
 .azurite/
+
+# Customer-specific engagement notes — contain subscription IDs, resource names
+# and live endpoints, so they must never be pushed to a shared repo.
+docs/BSN_*
+docs/poc.md

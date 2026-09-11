@@ -15,16 +15,16 @@
       "value": "${AZURE_AI_SERVICE_LOCATION}"
     },
     "databaseType": {
-      "value": "${DATABASE_TYPE=postgresql}"
+      "value": "${DATABASE_TYPE=cosmosdb}"
     },
     "ingestionTrigger": {
       "value": "${INGESTION_TRIGGER=direct_enqueue}"
     },
     "gptModelName": {
-      "value": "${AZURE_GPT_MODEL_NAME=gpt-5.4-mini}"
+      "value": "${AZURE_GPT_MODEL_NAME=gpt-5.6-sol}"
     },
     "gptModelVersion": {
-      "value": "${AZURE_GPT_MODEL_VERSION=2026-03-17}"
+      "value": "${AZURE_GPT_MODEL_VERSION=2026-07-09}"
     },
     "gptModelDeploymentType": {
       "value": "${AZURE_GPT_MODEL_DEPLOYMENT_TYPE=GlobalStandard}"
@@ -72,7 +72,7 @@
       "value": "${ENABLE_TELEMETRY=true}"
     },
     "enableMonitoring": {
-      "value": "${ENABLE_MONITORING=false}"
+      "value": "${ENABLE_MONITORING=true}"
     },
     "enableScalability": {
       "value": "${ENABLE_SCALABILITY=true}"

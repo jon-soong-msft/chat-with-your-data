@@ -42,10 +42,10 @@ param ingestionTrigger string = 'direct_enqueue'
 
 @minLength(1)
 @description('Optional. Primary chat model deployment name.')
-param gptModelName string = 'gpt-5.4-mini'
+param gptModelName string = 'gpt-5.6-sol'
 
 @description('Optional. Primary chat model version.')
-param gptModelVersion string = '2026-03-17'
+param gptModelVersion string = '2026-07-09'
 
 @description('Optional. SKU for the primary chat model deployment.')
 param gptModelDeploymentType string = 'GlobalStandard'
@@ -118,7 +118,7 @@ param existingFoundryProjectResourceId string = ''
 param enableTelemetry bool = true
 
 @description('Optional. Deploy Log Analytics + Application Insights and wire diagnostic settings on every applicable resource.')
-param enableMonitoring bool = false
+param enableMonitoring bool = true
 
 @description('Optional. Higher SKUs and autoscaling on App Service Plan, Container Apps, Search, and PostgreSQL.')
 param enableScalability bool = false
@@ -127,7 +127,7 @@ param enableScalability bool = false
 param enableRedundancy bool = false
 
 @description('Optional. Deploy a VNet, private endpoints, and disable public network access on data-plane resources. Wires the regional VNet (`modules/virtualNetwork.bicep`), private DNS zones, private endpoints for every data-plane resource, regional VNet integration for compute, and Bastion. Setting this to true is the WAF-aligned topology and requires no follow-up tasks; flipping it back to false re-enables public endpoints with default firewall rules.')
-param enablePrivateNetworking bool = false
+param enablePrivateNetworking bool = true
 
 // ============================================================================
 // Parameters — AVM-specific (ignored when deploymentFlavor = 'bicep')

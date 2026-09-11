@@ -17,7 +17,7 @@ The default deployments are:
 
 | Purpose | Model | Deployment type | Default capacity (TPM, thousands) |
 |---------|-------|-----------------|-----------------------------------|
-| Chat | `gpt-5.4-mini` | GlobalStandard | 50 |
+| Chat | `gpt-5.6-sol` | GlobalStandard | 50 |
 | Reasoning | `gpt-5-mini` | GlobalStandard | 50 |
 | Embeddings | `text-embedding-3-small` | Standard | 100 |
 
@@ -33,7 +33,7 @@ Follow the [quota check guide](QuotaCheck.md) to confirm capacity by region befo
 2. Select **View all resources** and find the Azure AI Services resource for this deployment.
 3. Open **Quota** from the management section.
 4. Select the deployment type (for example, **GlobalStandard**) from the dropdown.
-5. Choose the model (the chat model `gpt-5.4-mini` or the embedding model `text-embedding-3-small`) and the region where you deployed.
+5. Choose the model (the chat model `gpt-5.6-sol` or the embedding model `text-embedding-3-small`) and the region where you deployed.
 6. Request more quota, or delete unused model deployments to free capacity.
 
 ## Adjust capacity through azd

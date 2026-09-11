@@ -37,8 +37,8 @@ See [Chat history](chat_history.md) and [PostgreSQL](postgreSQL.md).
 | Name | Type | Default | Purpose |
 |------|------|---------|---------|
 | `AZURE_AI_SERVICE_LOCATION` | string | (`AZURE_LOCATION`) | Region for Azure AI Services and Foundry; restricted to regions with capacity for the chat model. |
-| `AZURE_GPT_MODEL_NAME` | string | `gpt-5.4-mini` | Chat model name. |
-| `AZURE_GPT_MODEL_VERSION` | string | `2026-03-17` | Chat model version. |
+| `AZURE_GPT_MODEL_NAME` | string | `gpt-5.6-sol` | Chat model name. |
+| `AZURE_GPT_MODEL_VERSION` | string | `2026-07-09` | Chat model version. |
 | `AZURE_GPT_MODEL_DEPLOYMENT_TYPE` | string | `GlobalStandard` | Chat model deployment type. |
 | `AZURE_GPT_MODEL_CAPACITY` | integer | `50` | Chat model capacity (TPM, thousands). |
 | `AZURE_REASONING_MODEL_NAME` | string | `gpt-5-mini` | Reasoning model name. |

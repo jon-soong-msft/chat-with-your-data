@@ -41,10 +41,10 @@ param ingestionTrigger string = 'direct_enqueue'
 
 @minLength(1)
 @description('Optional. Primary chat model deployment name.')
-param gptModelName string = 'gpt-5.4-mini'
+param gptModelName string = 'gpt-5.6-sol'
 
 @description('Optional. Primary chat model version.')
-param gptModelVersion string = '2026-03-17'
+param gptModelVersion string = '2026-07-09'
 
 @description('Optional. SKU for the primary chat model deployment.')
 param gptModelDeploymentType string = 'GlobalStandard'

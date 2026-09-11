@@ -240,9 +240,22 @@ try {
     Write-Host "--- Running post_provision.py ---"
     Write-Host ""
 
-    # Run the Python script (uses uv if available, falls back to python)
-    if (Get-Command uv -ErrorAction SilentlyContinue) {
-        uv run python "$ScriptDir\post_provision.py"
+    # Run the Python script.
+    # Interpreter selection order:
+    #   1. $env:CWYD_PYTHON  - explicit override. Required on restricted networks
+    #      where `uv` cannot reach PyPI (uv's rustls TLS stack gets rejected by
+    #      some inspecting proxies with "received fatal alert: HandshakeFailure",
+    #      while pip's OpenSSL stack works). Point this at a venv python that has
+    #      azure-identity, azure-search-documents, httpx and psycopg2-binary.
+    #   2. uv  - normal path. `--no-dev` is deliberate: post_provision.py only
+    #      needs runtime deps, so syncing the dev group (black, ruff, pytest, ...)
+    #      needlessly widens the install surface.
+    #   3. python3 / python on PATH.
+    if ($env:CWYD_PYTHON) {
+        Write-Host "[INFO] Using CWYD_PYTHON interpreter: $env:CWYD_PYTHON"
+        & $env:CWYD_PYTHON "$ScriptDir\post_provision.py"
+    } elseif (Get-Command uv -ErrorAction SilentlyContinue) {
+        uv run --no-dev python "$ScriptDir\post_provision.py"
     } elseif (Get-Command python3 -ErrorAction SilentlyContinue) {
         python3 "$ScriptDir\post_provision.py"
     } else {

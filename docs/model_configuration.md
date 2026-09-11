@@ -21,7 +21,7 @@ For the models and versions available in each region, see the [Azure AI Foundry 
 
 | Purpose | Model | Version | Deployment type | Capacity (TPM, thousands) |
 |---------|-------|---------|-----------------|---------------------------|
-| Chat | `gpt-5.4-mini` | `2026-03-17` | GlobalStandard | 50 |
+| Chat | `gpt-5.6-sol` | `2026-07-09` | GlobalStandard | 50 |
 | Reasoning | `gpt-5-mini` | `2025-08-07` | GlobalStandard | 50 |
 | Embeddings | `text-embedding-3-small` | `1` | Standard | 100 |
 
@@ -29,8 +29,8 @@ For the models and versions available in each region, see the [Azure AI Foundry 
 
 | Parameter | Example | Purpose |
 |-----------|---------|---------|
-| `AZURE_GPT_MODEL_NAME` | `gpt-5.4-mini` | Chat model name. |
-| `AZURE_GPT_MODEL_VERSION` | `2026-03-17` | Chat model version. |
+| `AZURE_GPT_MODEL_NAME` | `gpt-5.6-sol` | Chat model name. |
+| `AZURE_GPT_MODEL_VERSION` | `2026-07-09` | Chat model version. |
 | `AZURE_GPT_MODEL_DEPLOYMENT_TYPE` | `GlobalStandard` | Chat model deployment type. |
 | `AZURE_GPT_MODEL_CAPACITY` | `50` | Tokens-per-minute limit (thousands). |
 

@@ -192,17 +192,29 @@ try {
         Copy-Item -Path (Join-Path $RepoRoot 'pyproject.toml') -Destination $contextDir
         Copy-Item -Path (Join-Path $RepoRoot 'uv.lock')        -Destination $contextDir
 
-        Write-Info "  Submitting to ACR Tasks — streaming build log..."
+        # NOTE: `--no-logs` is deliberate. Streaming ACR Task logs through the
+        # Azure CLI crashes on Windows consoles: `az.cmd` launches
+        # `python.exe -IBm azure.cli` (isolated mode), which ignores
+        # PYTHONIOENCODING, and `acr/_stream_utils.py` calls `colorama.init()`
+        # unconditionally. Any non-cp1252 character in the build output (e.g.
+        # vite's U+2713 check mark) then raises UnicodeEncodeError and aborts
+        # the command even though the server-side build is fine.
+        # `--no-logs` still waits for completion and still sets a correct exit
+        # code, so build failures are detected exactly as before.
+        Write-Info "  Submitting to ACR Tasks — waiting for build to complete..."
         az acr build `
             --registry $AcrName `
             --image    "$($svc.Name):$Tag" `
             --file     $svc.Dockerfile `
+            --no-logs `
             $contextDir
         $buildExit = $LASTEXITCODE
         Remove-Item $contextDir -Recurse -Force -ErrorAction SilentlyContinue
 
         if ($buildExit -ne 0) {
-            Write-Error "Build failed for $($svc.Name). See ACR Task log above."
+            Write-Error ("Build failed for $($svc.Name). Retrieve the log with: " +
+                "az acr task logs --registry $AcrName --run-id <runId>  " +
+                "(list runs: az acr task list-runs --registry $AcrName --top 5 -o table)")
             exit 1
         }
         Write-Success "$($svc.Name):$Tag pushed"
