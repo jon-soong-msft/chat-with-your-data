@@ -213,9 +213,14 @@ def test_get_client_injected_seam_bypasses_endpoint_validation() -> None:
 
 
 @pytest.mark.asyncio
-async def test_parse_calls_begin_analyze_document_with_model_id_and_bytes_source() -> (
-    None
-):
+async def test_parse_calls_begin_analyze_document_with_model_id_and_raw_bytes() -> None:
+    """The payload goes out as a raw octet-stream body, not a base64 wrapper.
+
+    Regression guard: wrapping the buffer in
+    ``AnalyzeDocumentRequest(bytes_source=...)`` serialises it through a
+    ``format="base64"`` field plus ``json.dumps``, tripling peak memory and
+    OOM-killing the ingestion worker on large PDFs.
+    """
     fake_result = SimpleNamespace(pages=[_make_fake_page("page 1 content")])
     fake_client = _make_fake_client_with_result(fake_result)
     parser = DocumentIntelligenceParser(
@@ -227,7 +232,8 @@ async def test_parse_calls_begin_analyze_document_with_model_id_and_bytes_source
     fake_client.begin_analyze_document.assert_awaited_once()
     call = fake_client.begin_analyze_document.await_args
     assert call.args[0] == "prebuilt-layout"
-    assert call.args[1].bytes_source == b"pdf bytes"
+    assert call.args[1] == b"pdf bytes"
+    assert call.kwargs["content_type"] == "application/octet-stream"
 
 
 @pytest.mark.asyncio

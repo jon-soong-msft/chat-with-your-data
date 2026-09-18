@@ -21,6 +21,14 @@ internally, so the client just receives ``FoundrySettings.services_endpoint``
 normalised to one trailing slash. Auth is UAMI bearer for
 ``AadScope.COGNITIVE_SERVICES`` per Hard Rule #2 (no keys, no Key Vault).
 
+Upload path -- the blob buffer is handed to ``begin_analyze_document`` as
+a raw ``application/octet-stream`` body rather than wrapped in an
+``AnalyzeDocumentRequest``. See ``_ANALYZE_CONTENT_TYPE`` for why: the
+wrapper's ``bytes_source`` is a ``format="base64"`` field, so it costs a
+base64 copy plus a JSON copy plus a UTF-8 copy of the entire document
+before the request is sent. That amplification (~5.7x measured) is what
+OOM-killed ingestion on large scanned PDFs.
+
 Chunking strategy -- paginated formats (PDF, images) emit one ``Chunk``
 per Document Intelligence page, joining ``page.lines[*].content`` with
 ``\n``. Detected tables also emit structured label/value rows in the same
@@ -45,7 +53,6 @@ document keys via ``BaseParser.make_chunk_id(source, index)``.
 import logging
 
 from azure.ai.documentintelligence.aio import DocumentIntelligenceClient
-from azure.ai.documentintelligence.models import AnalyzeDocumentRequest
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.exceptions import AzureError
 
@@ -56,6 +63,21 @@ from backend.core.types import Chunk
 from .registry import registry
 
 logger = logging.getLogger(__name__)
+
+# Content type for the raw-binary upload path. Passing the blob bytes
+# straight through as an octet-stream keeps the SDK on its
+# ``isinstance(body, (IOBase, bytes))`` branch, which assigns the buffer
+# to the request content as-is. The alternative -- wrapping the payload in
+# ``AnalyzeDocumentRequest(bytes_source=...)`` -- routes through
+# ``json.dumps`` and a ``format="base64"`` rest_field, which materialises
+# a base64 copy (~1.33x) *and* a JSON string copy *and* its UTF-8
+# encoding before the request leaves the process. Measured on a 118 MiB
+# PDF that path peaks at ~668 MiB of Python heap versus ~118 MiB here,
+# which is what OOM-killed (SIGKILL -> "python exited with code 137") the
+# ingestion worker and sent the message to ``doc-processing-poison``.
+# Document Intelligence accepts the binary body directly, so the wrapper
+# bought nothing but the copies.
+_ANALYZE_CONTENT_TYPE = "application/octet-stream"
 
 # Target chunk size (characters) for the pageless paragraph fallback:
 # consecutive Document Intelligence paragraphs are grouped up to this budget so
@@ -136,7 +158,8 @@ class DocumentIntelligenceParser(BaseParser):
         try:
             poller = await client.begin_analyze_document(
                 self._settings.document_intelligence.model_id,
-                AnalyzeDocumentRequest(bytes_source=content),
+                content,
+                content_type=_ANALYZE_CONTENT_TYPE,
             )
             result = await poller.result()
         except AzureError:

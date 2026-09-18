@@ -14,7 +14,10 @@
   },
   "extensions": {
     "queues": {
-      "messageEncoding": "none"
+      "messageEncoding": "none",
+      "batchSize": 2,
+      "newBatchThreshold": 1,
+      "maxDequeueCount": 5
     }
   }
 }

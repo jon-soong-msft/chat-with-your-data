@@ -509,8 +509,10 @@ module backendContainerApp './modules/compute/container-app.bicep' = {
         name: 'backend'
         image: sampleContainerImage
         resources: {
-          cpu: json('0.5')
-          memory: '1.0Gi'
+          // Admin upload buffers the whole file in memory, so this must
+          // clear MAX_UPLOAD_SIZE_BYTES (200 MiB) with headroom.
+          cpu: json('1.0')
+          memory: '2.0Gi'
         }
         env: concat(
           [
@@ -636,8 +638,15 @@ module functionContainerApp './modules/compute/container-app.bicep' = {
         name: 'function'
         image: sampleContainerImage
         resources: {
-          cpu: json('0.5')
-          memory: '1.0Gi'
+          // Ingestion streams the blob bytes straight to Document
+          // Intelligence as an octet-stream body (see
+          // functions/core/parsers/document_intelligence_parser.py), so peak
+          // is roughly the file size plus one transport copy rather than the
+          // ~5.7x the old base64 + JSON request path cost. Sized to absorb a
+          // MAX_UPLOAD_SIZE_BYTES (200 MiB) file alongside the Functions host
+          // and the Document Intelligence response.
+          cpu: json('2.0')
+          memory: '4.0Gi'
         }
         env: concat(
           [
